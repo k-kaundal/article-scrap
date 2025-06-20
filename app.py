@@ -9,43 +9,104 @@ TEMPLATE = """
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Hindustan Times Article Viewer</title>
+    <title>HT Article Reader</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 5 CDN -->
+    <!-- Bootstrap 5 & Google Fonts -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { background: #f8f9fa; }
-        .container { max-width: 760px; margin-top: 40px; margin-bottom: 40px; background: #fff; border-radius: 10px; box-shadow: 0 0 12px #ddd; padding: 30px 26px; }
-        .article-title { font-size: 2rem; font-weight: 700; margin-bottom: 10px;}
-        .article-subtitle { font-size:1.25rem; color: #555; margin-bottom:20px;}
-        .author-date { font-size:1rem; color: #888; margin-bottom: 30px;}
-        .article-body p { font-size: 1.15rem; margin: 1.2em 0; line-height: 1.7;}
-        .article-body img { max-width: 100%; display: block; margin: 20px auto; border-radius: 7px;}
-        .article-body figure { margin: 1.5em 0; text-align: center;}
-        .article-body figcaption { font-size: 0.98rem; color: #666; margin-top: 5px;}
-        .premium {background: #fff3cd; border-left: 5px solid #ffe066; padding: 10px 18px;}
-        .form-control {font-size: 1.1rem;}
-        .btn-primary {font-size: 1.1rem;}
+        body {
+            background: #f2f2f2;
+            font-family: 'Inter', Arial, sans-serif;
+            color: #222;
+        }
+        .reader-container {
+            max-width: 760px;
+            margin: 48px auto 40px auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 40px #cbd0d8a3;
+            padding: 40px 26px 48px 26px;
+        }
+        .ht-title {
+            font-family: 'Merriweather', serif;
+            font-size: 2.3rem;
+            font-weight: 700;
+            color: #23272f;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+        .ht-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.25rem;
+            color: #666;
+            margin-bottom: 24px;
+        }
+        .ht-meta {
+            font-size: 1rem;
+            color: #8a91a5;
+            margin-bottom: 28px;
+        }
+        .article-body {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #242424;
+            margin-top: 18px;
+        }
+        .article-body p {
+            margin-bottom: 1.6em;
+        }
+        .article-body img, .article-body figure img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 1.5em 0 0.5em 0;
+            box-shadow: 0 2px 12px #cbd0d86f;
+        }
+        .article-body figure {
+            margin: 2.5em auto 2.5em auto;
+            text-align: center;
+        }
+        .article-body figcaption {
+            font-size: 1rem;
+            color: #888;
+            margin-top: 0.6em;
+        }
+        .premium {
+            background: #fffbe8;
+            border-left: 4px solid #ffe066;
+            padding: 14px 20px;
+            border-radius: 8px;
+            margin-bottom: 1.5em;
+        }
+        .ht-form {
+            background: #f8fafc;
+            border-radius: 8px;
+            box-shadow: 0 1px 7px #e2e6ed6c;
+            padding: 20px 16px 16px 16px;
+            margin-bottom: 30px;
+        }
         @media (max-width: 600px) {
-            .container {padding: 16px 4vw;}
-            .article-title { font-size: 1.25rem;}
+            .reader-container { padding: 17px 2vw 30px 2vw;}
+            .ht-title { font-size: 1.25rem;}
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2 class="mb-4">Hindustan Times Article Viewer</h2>
-        <form method="post" class="row g-2 mb-4">
-            <div class="col-9 col-sm-10">
-                <input type="text" name="url" class="form-control" placeholder="Paste Hindustan Times article URL here" required value="{{ url or '' }}">
-            </div>
-            <div class="col-3 col-sm-2">
-                <button class="btn btn-primary w-100" type="submit">Show Article</button>
-            </div>
-        </form>
-        {% if error %}
-            <div class="alert alert-danger">{{ error }}</div>
-        {% endif %}
+    <div class="reader-container">
+        <div class="ht-form mb-4">
+            <form method="post" class="row g-2">
+                <div class="col-12 col-md-9">
+                    <input type="text" name="url" class="form-control" placeholder="Paste Hindustan Times article URL here" required value="{{ url or '' }}">
+                </div>
+                <div class="col-12 col-md-3 d-grid">
+                    <button class="btn btn-dark" type="submit">Show Article</button>
+                </div>
+            </form>
+            {% if error %}
+                <div class="alert alert-danger mt-3 mb-0">{{ error }}</div>
+            {% endif %}
+        </div>
         {% if article %}
             {{ article|safe }}
         {% endif %}
@@ -58,13 +119,13 @@ def extract_full_article(html):
     soup = BeautifulSoup(html, "html.parser")
     # Headline
     headline = soup.find("h1")
-    headline_html = f'<div class="article-title">{headline.get_text(strip=True)}</div>' if headline else ""
+    headline_html = f'<div class="ht-title">{headline.get_text(strip=True)}</div>' if headline else ""
 
     # Subheadline
     subheadline = soup.find("h2")
-    subheadline_html = f'<div class="article-subtitle">{subheadline.get_text(strip=True)}</div>' if subheadline else ""
+    subheadline_html = f'<div class="ht-subtitle">{subheadline.get_text(strip=True)}</div>' if subheadline else ""
 
-    # Author/date (try to find in known places)
+    # Author/date
     author, date = "", ""
     author_div = soup.select_one(".storyBy .economistName")
     if author_div:
@@ -74,9 +135,9 @@ def extract_full_article(html):
         date = date_div.get_text(strip=True)
     author_date_html = ""
     if author or date:
-        author_date_html = f'<div class="author-date">'
+        author_date_html = f'<div class="ht-meta">'
         if author: author_date_html += f'By {author}'
-        if author and date: author_date_html += ' | '
+        if author and date: author_date_html += ' &nbsp;|&nbsp; '
         if date: author_date_html += date
         author_date_html += '</div>'
 
@@ -93,10 +154,13 @@ def extract_full_article(html):
 
     # Gather all <p>, <figure>, <blockquote> (including inside .paywall and outside)
     article_body = ""
-    # To avoid duplicates, only render direct children of content_div, and also anything inside .paywall
-    # Render in the order they appear
+    seen = set()
     for child in content_div.children:
         if getattr(child, 'name', None) in ['p', 'figure', 'blockquote']:
+            key = str(child)
+            if key in seen:
+                continue
+            seen.add(key)
             # Mark paywall/premium paragraphs for highlight
             classes = child.get("class") or []
             if "paywall" in classes or "premium" in classes:
@@ -104,12 +168,18 @@ def extract_full_article(html):
             else:
                 article_body += str(child)
         elif getattr(child, 'name', None) == 'div' and 'paywall' in (child.get("class") or []):
-            # Render all paragraphs inside paywall div
             for sub in child.find_all(['p', 'figure', 'blockquote'], recursive=False):
+                key = str(sub)
+                if key in seen:
+                    continue
+                seen.add(key)
                 article_body += f'<div class="premium">{str(sub)}</div>'
-        # Also check for image/figure containers outside paywall
         elif getattr(child, 'name', None) == 'div' and 'storyParagraphFigure' in (child.get("class") or []):
             for sub in child.find_all(['figure', 'img'], recursive=False):
+                key = str(sub)
+                if key in seen:
+                    continue
+                seen.add(key)
                 article_body += str(sub)
 
     # Clean up: Remove empty <p> and <div> tags
